@@ -31,9 +31,6 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json(parsed);
-payments[reference] = {
-status: "pending"
-}
   } catch (err) {
     return res.status(200).json(parsed);
   }
