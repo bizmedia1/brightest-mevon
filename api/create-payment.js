@@ -1,6 +1,5 @@
 export default async function handler(req, res) {
 
-  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -19,10 +18,9 @@ export default async function handler(req, res) {
   try {
 
     const {
-      firstName
+      firstName,
+      lastName
     } = req.body;
-
-    const lastName = "";
 
     const bvn = process.env.REGISTRATION_NUMBER;
 
@@ -43,6 +41,9 @@ export default async function handler(req, res) {
           lname: lastName,
 
           registration_number: bvn
+
+          // amount: amount,
+          // currency: "NGN"
 
         })
       }
@@ -66,33 +67,7 @@ export default async function handler(req, res) {
 
     }
 
-    if (!response.ok || !data.status) {
-
-      return res.status(400).json({
-        success: false,
-        message: data.message || "Unable to generate account",
-        response: data
-      });
-
-    }
-
-    return res.status(200).json({
-
-      success: true,
-
-      amount: 14000,
-
-      account_number: data.account_number,
-
-      account_name: data.account_name,
-
-      bank_name: data.bank_name,
-
-      reference: data.reference,
-
-      expiresAt: Date.now() + (30 * 60 * 1000)
-
-    });
+    return res.status(response.ok ? 200 : 400).json(data);
 
   } catch (err) {
 
