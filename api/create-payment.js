@@ -1,6 +1,4 @@
-import { SUPABASE_URL, SUPABASE_KEY } from "./store";
 export default async function handler(req, res) {
-
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -9,97 +7,42 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      success: false,
-      message: "Method not allowed"
-    });
-  }
-
   try {
-
-    const {
-      firstName,
-      lastName
-    } = req.body;
-
-    const bvn = process.env.REGISTRATION_NUMBER;
-
-    const response = await fetch(
-      "https://mevonpay.com.ng/V1/createtempva",
-      {
-        method: "POST",
-        headers: {
-          Authorization: process.env.MEVON_SECRET_KEY,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-
-          type: "rubies",
-
-          fname: firstName,
-
-          lname: lastName,
-
-          registration_number: bvn
-
-          // amount: amount,
-          // currency: "NGN"
-
-        })
-      }
-    );
+    const response = await fetch("https://mevonpay.com.ng/V1/createtempva", {
+      method: "POST",
+      headers: {
+        "Authorization": process.env.MEVON_SECRET_KEY, // ⚠️ NO Bearer here for this endpoint
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        fname: "John",
+        lname: "Doe"
+      })
+    });
 
     const text = await response.text();
 
-    let data;
-
+    let parsed;
     try {
-
-      data = JSON.parse(text.trim());
-
-console.log("MEVON RESPONSE:", data);
-
-if (data.account_number) {
-
-  await fetch(`${SUPABASE_URL}/rest/v1/payments`, {
-    method: "POST",
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      "Content-Type": "application/json",
-      Prefer: "return=minimal"
-    },
-    body: JSON.stringify({
-      account_number: data.account_number,
-      status: "pending",
-      amount: 0,
-      sender: "",
-      bank: ""
-    })
-  });
-
-}
-
+      const result = JSON.parse(text);
+      parsed = result.raw ? JSON.parse(result.raw) : result;
     } catch {
-
-      return res.status(500).json({
-        success: false,
-        message: "Non JSON response",
-        response: text
-      });
-
+      return res.status(500).json({ error: text });
     }
 
-    return res.status(response.ok ? 200 : 400).json(data);
-
-  } catch (err) {
-
-    return res.status(500).json({
-      success: false,
-      message: err.message
+    return res.status(200).json({
+      account_number: parsed.account_number,
+      account_name: parsed.account_name,
+      bank_name: parsed.bank_name,
+      amount: 14000,
+      reference: parsed.reference
     });
-
+payments[reference] = {
+status: "pending"
+}
+  } catch (err) {
+    return res.status(500).json({
+      error: err.message
+    });
   }
-
 }
