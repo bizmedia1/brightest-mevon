@@ -8,6 +8,10 @@ export default async function handler(req, res) {
   }
 
   try {
+    const {
+  firstName,
+  lastName
+} = req.body || {};
     const response = await fetch("https://mevonpay.com.ng/V1/createtempva", {
       method: "POST",
       headers: {
@@ -15,9 +19,9 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        fname: "John",
-        lname: "Doe"
-      })
+  fname: firstName || "New",
+  lname: lastName || "User"
+})
     });
 
     const text = await response.text();
@@ -31,15 +35,13 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json({
-      account_number: parsed.account_number,
-      account_name: parsed.account_name,
-      bank_name: parsed.bank_name,
-      amount: 14000,
-      reference: parsed.reference
-    });
-payments[reference] = {
-status: "pending"
-}
+  status: true,
+  account_number: parsed.account_number,
+  account_name: parsed.account_name,
+  bank_name: parsed.bank_name,
+  amount: 10500,
+  reference: parsed.reference
+});
   } catch (err) {
     return res.status(500).json({
       error: err.message
